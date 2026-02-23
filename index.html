@@ -12,13 +12,25 @@
         body {
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #FFF9F5; /* 暖米色背景 */
-            color: #5D4037; /* 深棕色文字，溫和且對比足夠 */
+            color: #5D4037; /* 深棕色文字 */
         }
         .card {
             background: white;
             border-radius: 20px;
             box-shadow: 0 4px 15px rgba(210, 180, 160, 0.2);
             border: 1px solid #F5E6D3;
+        }
+        .input-field {
+            border: 2px solid #F3E5F5;
+            border-radius: 12px;
+            padding: 12px 15px;
+            width: 100%;
+            font-size: 1.25rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .input-field:focus {
+            border-color: #D4A373;
         }
         .radio-item {
             display: flex;
@@ -38,7 +50,7 @@
             width: 28px;
             height: 28px;
             margin-right: 15px;
-            accent-color: #D4A373; /* 暖調棕色點選 */
+            accent-color: #D4A373;
         }
         .section-title {
             color: #8D6E63;
@@ -46,22 +58,10 @@
             padding-left: 15px;
             font-weight: 700;
         }
-        .btn-submit {
-            background-color: #D4A373;
-            transition: transform 0.1s;
-        }
-        .btn-submit:active {
-            transform: scale(0.95);
-        }
-        .btn-pdf {
-            background-color: #A98467;
-        }
-        /* VAS 樣式 */
-        .vas-container {
-            display: flex;
-            justify-content: space-between;
-            gap: 5px;
-        }
+        .btn-submit { background-color: #D4A373; transition: transform 0.1s; }
+        .btn-submit:active { transform: scale(0.95); }
+        .btn-pdf { background-color: #A98467; }
+        .vas-container { display: flex; justify-content: space-between; gap: 5px; }
         .vas-btn {
             flex: 1;
             padding: 15px 5px;
@@ -84,15 +84,29 @@
         <!-- 標題 -->
         <header class="text-center mb-10">
             <h1 class="text-3xl md:text-4xl font-bold mb-4">疼痛與生活評估問卷</h1>
-            <p class="text-xl text-gray-600">親愛的長輩您好，請根據您最近 1-2 週的情況回答</p>
+            <p class="text-xl text-gray-600">親愛的長輩您好，請填寫基本資料並回答問題</p>
         </header>
+
+        <!-- 基本資料欄位 -->
+        <section class="card p-6 mb-8">
+            <h2 class="section-title text-2xl mb-6">基本資料</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xl font-bold mb-2">姓名</label>
+                    <input type="text" id="userName" name="userName" placeholder="請輸入姓名" class="input-field">
+                </div>
+                <div>
+                    <label class="block text-xl font-bold mb-2">填寫日期</label>
+                    <input type="date" id="fillDate" name="fillDate" class="input-field">
+                </div>
+            </div>
+        </section>
 
         <!-- 第一部分：VAS 疼痛尺 -->
         <section class="card p-6 mb-8">
             <h2 class="section-title text-2xl mb-6">您的疼痛指數 (0-10)</h2>
             <p class="text-lg mb-4">0 代表不痛，10 代表最痛，請點選一個數字：</p>
             <div class="vas-container mb-4">
-                <!-- 生成 0-10 按鈕 -->
                 <script>
                     const vasColors = ['#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722', '#F44336', '#D32F2F', '#B71C1C', '#000000'];
                     for(let i=0; i<=10; i++) {
@@ -138,7 +152,13 @@
     </div>
 
     <script>
-        const scriptURL = "https://script.google.com/macros/s/AKfycbxFa2UzRANfomFtYEcOA4Uj_7t_lq_7J1m_V7_qs0U_ndsxaB5G401OeBTnsFQdkdF7/exec"; // 這裡貼上您的 Google Apps Script 網址
+        const scriptURL = "https://script.google.com/macros/s/AKfycbxFa2UzRANfomFtYEcOA4Uj_7t_lq_7J1m_V7_qs0U_ndsxaB5G401OeBTnsFQdkdF7/exec";
+
+        // 自動填寫今日日期
+        window.onload = () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('fillDate').value = today;
+        };
 
         const questions = [
             { id: "q1", title: "第一部份：疼痛程度", options: ["我現在不痛。", "我現在的疼痛非常輕微。", "我現在的疼痛中等程度。", "我現在的疼痛相當嚴重。", "我現在的疼痛非常嚴重。", "我現在的疼痛已無法形容。"] },
@@ -153,9 +173,8 @@
             { id: "q10", title: "第十部份：工作 / 家務", options: ["能從事所有的工作/家務。", "能從事大部分工作，但會引起疼痛。", "不能從事較吃力工作 (如提重物)。", "不能從事大部分工作/家務。", "完全不能從事任何工作/家務。", "完全喪失工作能力且無法分擔家事。"] }
         ];
 
-        // 渲染題目
         const container = document.getElementById('questions-container');
-        questions.forEach((q, qIndex) => {
+        questions.forEach((q) => {
             let html = `
                 <section class="card p-6 mb-8">
                     <h2 class="section-title text-2xl mb-6">${q.title}</h2>
@@ -173,7 +192,6 @@
             container.innerHTML += html;
         });
 
-        // VAS 選擇邏輯
         function selectVas(val) {
             document.getElementById('vas-value').value = val;
             for(let i=0; i<=10; i++) {
@@ -182,7 +200,6 @@
             document.getElementById(`vas-${val}`).classList.add('vas-selected');
         }
 
-        // 彈窗邏輯
         function showModal(title, text) {
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-text').innerText = text;
@@ -192,18 +209,22 @@
             document.getElementById('modal').classList.add('hidden');
         }
 
-        // 提交表單
         async function submitForm() {
+            const name = document.getElementById('userName').value;
+            const date = document.getElementById('fillDate').value;
             const vas = document.getElementById('vas-value').value;
-            if (vas === "") {
-                showModal("提示", "請選擇您的疼痛指數 (VAS)");
-                return;
-            }
+            
+            if (!name) { showModal("提示", "請輸入您的姓名"); return; }
+            if (vas === "") { showModal("提示", "請點選您的疼痛指數 (VAS)"); return; }
 
             const formData = new FormData(document.getElementById('odi-form'));
-            const data = { vas: vas };
+            const data = { 
+                userName: name, 
+                fillDate: date, 
+                vas: vas 
+            };
+            
             let complete = true;
-
             questions.forEach(q => {
                 const val = formData.get(q.id);
                 if (val === null) complete = false;
@@ -215,29 +236,21 @@
                 return;
             }
 
-            if (!scriptURL) {
-                showModal("開發者提示", "尚未設定 Google Apps Script URL，資料無法存入雲端，但您可以點擊匯出 PDF。");
-                return;
-            }
-
             try {
                 showModal("傳送中", "正在儲存您的資料...");
-                const response = await fetch(scriptURL, {
+                await fetch(scriptURL, {
                     method: 'POST',
                     body: JSON.stringify(data)
                 });
                 showModal("完成", "問卷已成功提交，謝謝您！");
             } catch (error) {
-                showModal("錯誤", "提交失敗，請檢查網路連線。");
+                showModal("錯誤", "提交失敗，請檢查網路。");
             }
         }
 
-        // 產生 PDF
         async function generatePDF() {
             const { jsPDF } = window.jspdf;
             const element = document.getElementById('survey-content');
-            
-            // 隱藏按鈕避免出現在 PDF 中
             const buttons = document.querySelectorAll('button');
             buttons.forEach(b => b.style.display = 'none');
 
@@ -245,12 +258,11 @@
                 const canvas = await html2canvas(element, { scale: 2 });
                 const imgData = canvas.toDataURL('image/png');
                 const pdf = new jsPDF('p', 'mm', 'a4');
-                const imgProps = pdf.getImageProperties(imgData);
                 const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
                 
                 pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-                pdf.save("疼痛評估問卷報告.pdf");
+                pdf.save(`疼痛問卷_${document.getElementById('userName').value || '未命名'}.pdf`);
             } catch (e) {
                 showModal("錯誤", "產生 PDF 時發生問題");
             } finally {
