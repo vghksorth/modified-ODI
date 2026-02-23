@@ -11,8 +11,8 @@
     <style>
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background-color: #FFF9F5; /* 暖米色背景 */
-            color: #5D4037; /* 深棕色文字 */
+            background-color: #FFF9F5;
+            color: #5D4037;
         }
         .card {
             background: white;
@@ -81,13 +81,12 @@
 <body class="p-4 md:p-8">
 
     <div id="survey-content" class="max-w-3xl mx-auto">
-        <!-- 標題 -->
         <header class="text-center mb-10">
             <h1 class="text-3xl md:text-4xl font-bold mb-4">疼痛與生活評估問卷</h1>
             <p class="text-xl text-gray-600">親愛的長輩您好，請填寫基本資料並回答問題</p>
         </header>
 
-        <!-- 基本資料欄位 -->
+        <!-- 基本資料 -->
         <section class="card p-6 mb-8">
             <h2 class="section-title text-2xl mb-6">基本資料</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -102,7 +101,7 @@
             </div>
         </section>
 
-        <!-- 第一部分：VAS 疼痛尺 -->
+        <!-- VAS 疼痛尺 -->
         <section class="card p-6 mb-8">
             <h2 class="section-title text-2xl mb-6">您的疼痛指數 (0-10)</h2>
             <p class="text-lg mb-4">0 代表不痛，10 代表最痛，請點選一個數字：</p>
@@ -121,40 +120,27 @@
             <input type="hidden" id="vas-value" name="vas">
         </section>
 
-        <div class="mb-6 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-            <p class="text-xl font-bold">填寫提示：</p>
-            <p class="text-lg">每題只能選一個答案。如果疼痛程度介於兩者之間，請選較嚴重的那個。</p>
-        </div>
-
-        <!-- ODI 問題區域 -->
         <form id="odi-form">
             <div id="questions-container"></div>
-
-            <!-- 按鈕區域 -->
             <div class="flex flex-col gap-4 mt-12 mb-20">
-                <button type="button" onclick="submitForm()" class="btn-submit text-white text-2xl font-bold py-5 rounded-2xl shadow-lg">
-                    提交問卷
-                </button>
-                <button type="button" onclick="generatePDF()" class="btn-pdf text-white text-2xl font-bold py-5 rounded-2xl shadow-lg">
-                    轉成 PDF 下載
-                </button>
+                <button type="button" onclick="submitForm()" class="btn-submit text-white text-2xl font-bold py-5 rounded-2xl shadow-lg">提交問卷</button>
+                <button type="button" onclick="generatePDF()" class="btn-pdf text-white text-2xl font-bold py-5 rounded-2xl shadow-lg">轉成 PDF 下載</button>
             </div>
         </form>
     </div>
 
-    <!-- 訊息提示視窗 -->
     <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center">
-            <h3 id="modal-title" class="text-2xl font-bold mb-4">標題</h3>
+            <h3 id="modal-title" class="text-2xl font-bold mb-4">提示</h3>
             <p id="modal-text" class="text-xl mb-6">內容</p>
             <button onclick="closeModal()" class="w-full py-3 bg-gray-200 rounded-xl text-xl">關閉</button>
         </div>
     </div>
 
     <script>
+        // 請確保此處填寫您最新的 Google Apps Script 網址
         const scriptURL = "https://script.google.com/macros/s/AKfycbxFa2UzRANfomFtYEcOA4Uj_7t_lq_7J1m_V7_qs0U_ndsxaB5G401OeBTnsFQdkdF7/exec";
 
-        // 自動填寫今日日期
         window.onload = () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('fillDate').value = today;
@@ -162,31 +148,22 @@
 
         const questions = [
             { id: "q1", title: "第一部份：疼痛程度", options: ["我現在不痛。", "我現在的疼痛非常輕微。", "我現在的疼痛中等程度。", "我現在的疼痛相當嚴重。", "我現在的疼痛非常嚴重。", "我現在的疼痛已無法形容。"] },
-            { id: "q2", title: "第二部份：自我照顧", options: ["我可以自我照顧，不會更痛。", "我可以自我照顧，但覺得很痛。", "我可以自我照顧，但覺得很痛 (程度二)。", "大部分自我照顧都可以自己來，但需要一些協助。", "每天的自我照顧大部分都需要協助。", "我無法自己穿衣服，洗澡有困難，我都躺在床上。"] },
+            { id: "q2", title: "第二部份：自我照顧", options: ["我可以自我照顧，不會更痛。", "我可以自我照顧，但會造成疼痛。", "我可以自我照顧，但覺得很痛。", "大部分自我照顧都可以自己來，但需要一些協助。", "每天的自我照顧大部分都需要協助。", "我無法自己穿衣服，洗澡有困難，需要臥床。"] },
             { id: "q3", title: "第三部份：抬舉物品", options: ["我可以舉起重物，不會更痛。", "我可以舉起重物，但會更痛。", "無法從地面舉起重物，但桌上可以。", "無法舉起重物，但可以舉起輕到中等的。", "我只能舉起很輕的東西。", "我完全無法舉起或攜提任何東西。"] },
-            { id: "q4", title: "第四部份：走路", options: ["我可以走任何距離。", "無法走超過 1.6 公里 (約4圈操場)。", "無法走超過 400 公尺 (約1圈操場)。", "無法走超過 100 公尺。", "我只有依靠柺杖才能走。", "我大部分時間都臥床。"] },
-            { id: "q5", title: "第五部份：坐", options: ["我可以坐任何椅子，想坐多久都可以。", "我只能坐特定椅子，想坐多久都可以。", "無法坐超過 1 小時。", "無法坐超過半小時。", "無法坐超過 10 分鐘。", "我無法坐著。"] },
-            { id: "q6", title: "第六部份：站", options: ["我要站多久都可以，不會更痛。", "我要站多久都可以，但會更痛。", "無法站超過 1 小時。", "無法站超過半小時。", "無法站超過 10 分鐘。", "我無法站著。"] },
-            { id: "q7", title: "第七部份：睡眠", options: ["睡眠從未受到疼痛干擾。", "睡眠偶而受到疼痛干擾。", "睡眠時間少於 6 小時。", "睡眠時間少於 4 小時。", "睡眠時間少於 2 小時。", "疼痛使我無法入睡。"] },
-            { id: "q8", title: "第八部份：社交生活", options: ["社交生活正常而且不會更痛。", "社交生活正常但會增加疼痛。", "除了激烈運動外，社交生活無明顯影響。", "疼痛限制社交生活，使我不常出門。", "社交生活侷限在家裡。", "我沒有社交生活。"] },
-            { id: "q9", title: "第九部份：旅遊", options: ["可以到處旅遊不會疼痛。", "可以到處旅遊但會更痛。", "可以旅遊超過 2 個小時，但會不適。", "限制我只能從事少於 1 個小時的旅程。", "限制我只能從事少於 30 分鐘必要活動。", "除了接受治療，我無法外出。"] },
-            { id: "q10", title: "第十部份：工作 / 家務", options: ["能從事所有的工作/家務。", "能從事大部分工作，但會引起疼痛。", "不能從事較吃力工作 (如提重物)。", "不能從事大部分工作/家務。", "完全不能從事任何工作/家務。", "完全喪失工作能力且無法分擔家事。"] }
+            { id: "q4", title: "第四部份：走路", options: ["我可以走任何距離。", "無法走超過 1.6 公里。", "無法走超過 400 公尺。", "無法走超過 100 公尺。", "我只有依靠柺杖才能走。", "我大部分時間都臥床。"] },
+            { id: "q5", title: "第五部份：坐", options: ["我可以坐任何椅子。", "我只能坐特定椅子。", "無法坐超過 1 小時。", "無法坐超過半小時。", "無法坐超過 10 分鐘。", "我無法坐著。"] },
+            { id: "q6", title: "第六部份：站", options: ["我要站多久都可以。", "我要站多久都可以，但會痛。", "無法站超過 1 小時。", "無法站超過半小時。", "無法站超過 10 分鐘。", "我無法站著。"] },
+            { id: "q7", title: "第七部份：睡眠", options: ["睡眠從未受到干擾。", "睡眠偶而受到干擾。", "睡眠時間少於 6 小時。", "睡眠時間少於 4 小時。", "睡眠時間少於 2 小時。", "疼痛使我無法入睡。"] },
+            { id: "q8", title: "第八部份：社交生活", options: ["社交生活正常。", "社交生活正常但會增加疼痛。", "除了激烈運動外無明顯影響。", "疼痛限制社交生活。", "社交生活侷限在家裡。", "我沒有社交生活。"] },
+            { id: "q9", title: "第九部份：旅遊", options: ["可以到處旅遊。", "可以到處旅遊但會痛。", "可以旅遊超過 2 個小時。", "只能從事少於 1 個小時的旅程。", "只能從事少於 30 分鐘必要活動。", "我無法外出。"] },
+            { id: "q10", title: "第十部份：工作 / 家務", options: ["能從事所有工作。", "能從事大部分工作。", "不能從事較吃力工作。", "不能從事大部分工作。", "完全不能從事任何工作。", "完全喪失工作能力。"] }
         ];
 
         const container = document.getElementById('questions-container');
         questions.forEach((q) => {
-            let html = `
-                <section class="card p-6 mb-8">
-                    <h2 class="section-title text-2xl mb-6">${q.title}</h2>
-                    <div class="space-y-3">
-            `;
+            let html = `<section class="card p-6 mb-8"><h2 class="section-title text-2xl mb-6">${q.title}</h2><div class="space-y-3">`;
             q.options.forEach((opt, oIndex) => {
-                html += `
-                    <label class="radio-item text-xl">
-                        <input type="radio" name="${q.id}" value="${oIndex}" required>
-                        <span>${opt}</span>
-                    </label>
-                `;
+                html += `<label class="radio-item text-xl"><input type="radio" name="${q.id}" value="${oIndex}" required><span>${opt}</span></label>`;
             });
             html += `</div></section>`;
             container.innerHTML += html;
@@ -194,9 +171,7 @@
 
         function selectVas(val) {
             document.getElementById('vas-value').value = val;
-            for(let i=0; i<=10; i++) {
-                document.getElementById(`vas-${i}`).classList.remove('vas-selected');
-            }
+            for(let i=0; i<=10; i++) document.getElementById(`vas-${i}`).classList.remove('vas-selected');
             document.getElementById(`vas-${val}`).classList.add('vas-selected');
         }
 
@@ -205,24 +180,18 @@
             document.getElementById('modal-text').innerText = text;
             document.getElementById('modal').classList.remove('hidden');
         }
-        function closeModal() {
-            document.getElementById('modal').classList.add('hidden');
-        }
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
 
         async function submitForm() {
             const name = document.getElementById('userName').value;
             const date = document.getElementById('fillDate').value;
             const vas = document.getElementById('vas-value').value;
             
-            if (!name) { showModal("提示", "請輸入您的姓名"); return; }
-            if (vas === "") { showModal("提示", "請點選您的疼痛指數 (VAS)"); return; }
+            if (!name) { showModal("提示", "請輸入姓名"); return; }
+            if (vas === "") { showModal("提示", "請點選疼痛指數"); return; }
 
             const formData = new FormData(document.getElementById('odi-form'));
-            const data = { 
-                userName: name, 
-                fillDate: date, 
-                vas: vas 
-            };
+            const data = { userName: name, fillDate: date, vas: vas };
             
             let complete = true;
             questions.forEach(q => {
@@ -231,18 +200,16 @@
                 data[q.id] = val;
             });
 
-            if (!complete) {
-                showModal("提示", "請填寫完所有題目後再提交");
-                return;
-            }
+            if (!complete) { showModal("提示", "請填寫完所有題目"); return; }
 
             try {
-                showModal("傳送中", "正在儲存您的資料...");
-                await fetch(scriptURL, {
+                showModal("處理中", "正在儲存您的資料...");
+                const response = await fetch(scriptURL, {
                     method: 'POST',
+                    mode: 'no-cors', // 解決跨網域問題
                     body: JSON.stringify(data)
                 });
-                showModal("完成", "問卷已成功提交，謝謝您！");
+                showModal("完成", "問卷已提交，謝謝！");
             } catch (error) {
                 showModal("錯誤", "提交失敗，請檢查網路。");
             }
@@ -253,18 +220,14 @@
             const element = document.getElementById('survey-content');
             const buttons = document.querySelectorAll('button');
             buttons.forEach(b => b.style.display = 'none');
-
             try {
                 const canvas = await html2canvas(element, { scale: 2 });
                 const imgData = canvas.toDataURL('image/png');
                 const pdf = new jsPDF('p', 'mm', 'a4');
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-                
                 pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
                 pdf.save(`疼痛問卷_${document.getElementById('userName').value || '未命名'}.pdf`);
-            } catch (e) {
-                showModal("錯誤", "產生 PDF 時發生問題");
             } finally {
                 buttons.forEach(b => b.style.display = 'block');
             }
