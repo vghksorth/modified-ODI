@@ -7,11 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background-color: #FFFDFB; /* 更清爽的暖白色 */
+            background-color: #FFFDFB;
             color: #5D4037;
         }
         .card {
@@ -27,7 +27,6 @@
             width: 100%;
             font-size: 1.25rem;
             outline: none;
-            transition: border-color 0.2s;
         }
         .radio-item {
             display: flex;
@@ -53,7 +52,7 @@
             padding-left: 15px;
             font-weight: 700;
         }
-        /* Memphis Style for VAS */
+        /* VAS Memphis Icons */
         .vas-btn {
             flex: 1;
             padding: 10px 2px;
@@ -65,7 +64,6 @@
             flex-direction: column;
             align-items: center;
             background: white;
-            transition: all 0.1s;
         }
         .vas-selected {
             background-color: #F15BB5 !important;
@@ -87,6 +85,28 @@
             font-weight: 700;
             flex-shrink: 0;
             border: 1px solid #E6D5C5;
+        }
+
+        /* PDF Summary Table Styles (Hidden on Screen) */
+        #pdf-summary {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+            width: 800px;
+            padding: 40px;
+            background: white;
+            color: black;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .summary-table th, .summary-table td {
+            border: 1px solid black;
+            padding: 12px;
+            text-align: left;
+            font-size: 18px;
         }
     </style>
 </head>
@@ -140,12 +160,12 @@
         <form id="odi-form">
             <div id="questions-container"></div>
 
-            <!-- 總分呈現區 (非浮動) -->
+            <!-- 總分呈現區 -->
             <section class="card p-8 mb-8 border-2 border-amber-200 bg-amber-50/30">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                     <div>
-                        <h2 class="text-2xl font-bold text-amber-900">評估結果總結</h2>
-                        <p class="text-stone-500">根據您的作答情形，計算出的功能障礙指數為：</p>
+                        <h2 class="text-2xl font-bold text-amber-900">Oswestry Disability Index總分</h2>
+                        <p class="text-stone-500">根據您的作答情形，結果為：</p>
                     </div>
                     <div class="text-center">
                         <span id="score-text" class="text-6xl font-black text-amber-600">0%</span>
@@ -154,19 +174,53 @@
                 </div>
             </section>
 
-            <!-- 按鈕 -->
             <div class="flex flex-col gap-4 mt-8 mb-24">
                 <button type="button" onclick="submitForm()" class="bg-[#D4A373] hover:bg-[#B88B5D] text-white text-2xl font-bold py-5 rounded-2xl shadow-lg transition duration-200">
                     確認並提交問卷
                 </button>
                 <button type="button" onclick="generatePDF()" class="bg-[#A98467] hover:bg-[#8E6D52] text-white text-xl font-bold py-5 rounded-2xl shadow-lg transition duration-200">
-                    下載完整報告 (PDF)
+                    下載結果總結報告 (PDF)
                 </button>
             </div>
         </form>
     </div>
 
-    <!-- Modal -->
+    <!-- PDF 隱藏總結區塊 (依照 image_6d6a3f.png 設計) -->
+    <div id="pdf-summary">
+        <div style="border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between;">
+            <div style="font-size: 24px; font-weight: bold;">姓名：<span id="pdf-name"></span></div>
+            <div style="font-size: 24px; font-weight: bold;">填寫日期：<span id="pdf-date"></span></div>
+        </div>
+        
+        <h3 style="font-size: 22px; font-weight: bold; margin-bottom: 10px;">第一部分：VAS 分數</h3>
+        <table class="summary-table" style="margin-bottom: 30px;">
+            <tr>
+                <th style="width: 70%;">背部 VAS</th>
+                <td id="pdf-vas-back"></td>
+            </tr>
+            <tr>
+                <th>下肢 VAS</th>
+                <td id="pdf-vas-leg"></td>
+            </tr>
+        </table>
+
+        <table class="summary-table">
+            <thead>
+                <tr style="background-color: #f2f2f2;">
+                    <th style="width: 70%;">評估項目</th>
+                    <th>得分 (0-5)</th>
+                </tr>
+            </thead>
+            <tbody id="pdf-table-body">
+                <!-- 由 JS 動態填入 -->
+            </tbody>
+        </table>
+
+        <div style="margin-top: 40px; font-size: 26px; font-weight: 900; border-top: 3px double black; padding-top: 20px;">
+            Modified ODI 總分：<span id="pdf-total-score"></span>
+        </div>
+    </div>
+
     <div id="modal" class="fixed inset-0 bg-black/40 hidden z-[200] flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
             <h3 id="modal-title" class="text-2xl font-bold mb-4">提示</h3>
@@ -208,22 +262,35 @@
         }
 
         const questions = [
-            { id: "q1", title: "第一部份：疼痛程度", options: ["我現在不痛。", "輕微的疼痛。", "中等程度的疼痛。", "相當嚴重的疼痛。", "非常嚴重的疼痛。", "無法形容的疼痛。"] },
-            { id: "q2", title: "第二部份：自我照顧", options: ["可自我照顧，不會更痛。", "可自我照顧，但會痛。", "可自我照顧，但覺得很痛。", "大部分可自理，但需協助。", "每天大部分都需要協助。", "完全無法自理，需臥床。"] },
-            { id: "q3", title: "第三部份：抬舉物品", options: ["可舉重物，不會更痛。", "可舉重物，但會痛。", "無法從地舉，桌上可以。", "無法舉重，輕的可以。", "只能舉起很輕的東西。", "完全無法舉起任何。"] },
-            { id: "q4", title: "第四部份：走路", options: ["可以走任何距離。", "無法走超過 1.6 公里。", "無法走超過 400 公尺。", "無法走超過 100 公尺。", "需依靠柺杖才能走。", "大部分時間都臥床。"] },
-            { id: "q5", title: "第五部份：坐", options: ["可以坐任何椅子。", "只能坐特定椅子。", "無法坐超過 1 小時。", "無法坐超過半小時。", "無法坐超過 10 分鐘。", "我無法坐著。"] },
-            { id: "q6", title: "第六部份：站", options: ["要站多久都可以。", "可站很久，但會痛。", "無法站超過 1 小時。", "無法站超過半小時。", "無法站超過 10 分鐘。", "我無法站著。"] },
-            { id: "q7", title: "第七部份：睡眠", options: ["睡眠從未受干擾。", "睡眠偶而受干擾。", "睡眠少於 6 小時。", "睡眠少於 4 小時。", "睡眠少於 2 小時。", "完全無法入睡。"] },
-            { id: "q8", title: "第八部份：社交生活", options: ["社交生活正常。", "社交正常但增加痛。", "除運動外無影響。", "疼痛限制社交生活。", "社交侷限在家裡。", "我沒有社交生活。"] },
-            { id: "q9", title: "第九部份：旅遊", options: ["可以到處旅遊。", "可以旅遊但會痛。", "可旅超過 2 小時。", "限少於 1 小時旅程。", "限少於 30 分旅程。", "無法外出。"] },
-            { id: "q10", title: "第十部份：工作/家務", options: ["能從事所有工作。", "能從事大部分工作。", "不能從事吃力工作。", "不能從事大部分工作。", "不能從事任何工作。", "完全喪失工作能力。"] }
+            { id: "q1", title: "第一部份：疼痛程度", label: "第一部份：疼痛程度" },
+            { id: "q2", title: "第二部份：自我照顧", label: "第二部份：自我照顧" },
+            { id: "q3", title: "第三部份：抬舉物品", label: "第三部份：抬舉物品" },
+            { id: "q4", title: "第四部份：走路", label: "第四部份：走路" },
+            { id: "q5", title: "第五部份：坐", label: "第五部份：坐" },
+            { id: "q6", title: "第六部份：站", label: "第六部份：站" },
+            { id: "q7", title: "第七部份：睡眠", label: "第七部份：睡眠" },
+            { id: "q8", title: "第八部份：社交生活", label: "第八部份：社交生活" },
+            { id: "q9", title: "第九部份：旅遊", label: "第九部份：旅遊" },
+            { id: "q10", title: "第十部份：工作 / 家務", label: "第十部份：工作 / 家務" }
+        ];
+
+        const optionsArr = [
+            ["我現在不痛。", "輕微的疼痛。", "中等程度的疼痛。", "相當嚴重的疼痛。", "非常嚴重的疼痛。", "無法形容的疼痛。"],
+            ["可自我照顧，不會更痛。", "可自我照顧，但會痛。", "可自我照顧，但覺得很痛。", "大部分可自理，但需協助。", "每天大部分都需要協助。", "完全無法自理，需臥床。"],
+            ["可舉重物，不會更痛。", "可舉重物，但會痛。", "無法從地舉，桌上可以。", "無法舉重，輕的可以。", "只能舉起很輕的東西。", "完全無法舉起任何。"],
+            ["可以走任何距離。", "無法走超過 1.6 公里。", "無法走超過 400 公尺。", "無法走超過 100 公尺。", "需依靠柺杖才能走。", "大部分時間都臥床。"],
+            ["可以坐任何椅子。", "只能坐特定椅子。", "無法坐超過 1 小時。", "無法坐超過半小時。", "無法坐超過 10 分鐘。", "我無法坐著。"],
+            ["要站多久都可以。", "可站很久，但會痛。", "無法站超過 1 小時。", "無法站超過半小時。", "無法站超過 10 分鐘。", "我無法站著。"],
+            ["睡眠從未受干擾。", "睡眠偶而受干擾。", "睡眠少於 6 小時。", "睡眠少於 4 小時。", "睡眠少於 2 小時。", "完全無法入睡。"],
+            ["社交生活正常。", "社交正常但增加痛。", "除運動外無影響。", "疼痛限制社交生活。", "社交侷限在家裡。", "我沒有社交生活。"],
+            ["可以到處旅遊。", "可以旅遊但會痛。", "可旅超過 2 小時。", "限少於 1 小時旅程。", "限少於 30 分旅程。", "無法外出。"],
+            ["能從事所有工作。", "能從事大部分工作。", "不能從事吃力工作。", "不能從事大部分工作。", "不能從事任何工作。", "完全喪失工作能力。"]
         ];
 
         const qContainer = document.getElementById('questions-container');
-        questions.forEach(q => {
+        questions.forEach((q, qIdx) => {
             let html = `<section class="card p-8 mb-8"><h2 class="section-title text-2xl mb-6">${q.title}</h2><div class="space-y-3">`;
-            q.options.forEach((opt, idx) => {
+            optionsArr[qIdx].forEach((opt, idx) => {
                 html += `<label class="radio-item text-xl"><input type="radio" name="${q.id}" value="${idx}" onchange="calculateScore()"><span class="score-badge">${idx}</span><span>${opt}</span></label>`;
             });
             qContainer.innerHTML += html + `</div></section>`;
@@ -259,7 +326,6 @@
             const formData = new FormData(document.getElementById('odi-form'));
             const data = { userName: name, fillDate: date, vasBack, vasLeg, odiScore: scorePct };
 
-            // 確保每一題都有值，未選則填 NIL
             questions.forEach(q => {
                 const val = formData.get(q.id);
                 data[q.id] = (val !== null) ? val : "NIL";
@@ -275,34 +341,47 @@
         }
 
         async function generatePDF() {
+            // 填寫 PDF 表格內容
+            const name = document.getElementById('userName').value || "未填寫";
+            const date = document.getElementById('fillDate').value || "未填寫";
+            document.getElementById('pdf-name').innerText = name;
+            document.getElementById('pdf-date').innerText = date;
+            document.getElementById('pdf-vas-back').innerText = document.getElementById('vas-back-value').value || "NIL";
+            document.getElementById('pdf-vas-leg').innerText = document.getElementById('vas-leg-value').value || "NIL";
+            document.getElementById('pdf-total-score').innerText = document.getElementById('score-text').innerText;
+
+            const formData = new FormData(document.getElementById('odi-form'));
+            let tableHtml = "";
+            questions.forEach(q => {
+                const val = formData.get(q.id);
+                tableHtml += `<tr><td>${q.label}</td><td>${val !== null ? val : "NIL"}</td></tr>`;
+            });
+            document.getElementById('pdf-table-body').innerHTML = tableHtml;
+
             const { jsPDF } = window.jspdf;
-            const element = document.getElementById('survey-content');
-            const buttons = document.querySelectorAll('button');
-            buttons.forEach(b => b.style.opacity = '0');
+            const element = document.getElementById('pdf-summary');
 
             try {
-                const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#FFFDFB' });
+                // 暫時將總結區移入視野進行截圖
+                element.style.position = 'static';
+                element.style.left = '0';
+                element.style.top = '0';
+
+                const canvas = await html2canvas(element, { scale: 2 });
                 const imgData = canvas.toDataURL('image/png');
                 const pdf = new jsPDF('p', 'mm', 'a4');
                 const pdfWidth = 210;
                 const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
                 
-                let heightLeft = pdfHeight;
-                let position = 0;
-                let pageHeight = 295;
-
-                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-                heightLeft -= pageHeight;
-
-                while (heightLeft >= 0) {
-                    position = heightLeft - pdfHeight;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-                    heightLeft -= pageHeight;
-                }
-                pdf.save(`疼痛評估報告_${document.getElementById('userName').value || '未填名'}.pdf`);
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(`疼痛評估總結_${name}.pdf`);
+            } catch (e) {
+                showModal("錯誤", "PDF 產生失敗");
             } finally {
-                buttons.forEach(b => b.style.opacity = '1');
+                // 還原隱藏狀態
+                element.style.position = 'absolute';
+                element.style.left = '-9999px';
+                element.style.top = '-9999px';
             }
         }
     </script>
