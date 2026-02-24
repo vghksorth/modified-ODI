@@ -11,17 +11,17 @@
     <style>
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background-color: #FFF9F5; /* 暖米色背景 */
-            color: #5D4037; /* 深棕色文字 */
+            background-color: #FFFDFB; /* 更清爽的暖白色 */
+            color: #5D4037;
         }
         .card {
             background: white;
-            border-radius: 24px;
-            box-shadow: 0 10px 25px rgba(210, 180, 160, 0.15);
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(210, 180, 160, 0.1);
             border: 1px solid #F5E6D3;
         }
         .input-field {
-            border: 2px solid #EEE4DB;
+            border: 2px solid #F3E5F5;
             border-radius: 12px;
             padding: 12px 15px;
             width: 100%;
@@ -29,27 +29,21 @@
             outline: none;
             transition: border-color 0.2s;
         }
-        .input-field:focus {
-            border-color: #D4A373;
-        }
         .radio-item {
             display: flex;
             align-items: center;
-            padding: 14px;
+            padding: 15px;
             margin-bottom: 10px;
             border-radius: 16px;
             background: #FFF;
-            border: 2px solid #F5EEE6;
+            border: 2px solid #F8F1EA;
             transition: all 0.2s;
             cursor: pointer;
         }
-        .radio-item:hover {
-            background: #FFF9F0;
-            border-color: #E6D5C5;
-        }
+        .radio-item:hover { background: #FFF9F3; }
         input[type="radio"] {
-            width: 26px;
-            height: 26px;
+            width: 28px;
+            height: 28px;
             margin-right: 15px;
             accent-color: #D4A373;
         }
@@ -59,10 +53,10 @@
             padding-left: 15px;
             font-weight: 700;
         }
-        /* Memphis Style for VAS only */
+        /* Memphis Style for VAS */
         .vas-btn {
             flex: 1;
-            padding: 8px 2px;
+            padding: 10px 2px;
             text-align: center;
             border: 2px solid #2D2D2D;
             cursor: pointer;
@@ -79,12 +73,10 @@
             transform: translateY(-3px);
             box-shadow: 0px 4px 0px #2D2D2D;
         }
-        .face-icon { width: 40px; height: 40px; margin-bottom: 4px; }
-        
-        /* Score Badge inside radio */
+        .face-icon { width: 38px; height: 38px; margin-bottom: 4px; }
         .score-badge {
-            background: #F5EEE6;
-            color: #8D6E63;
+            background: #FDF6F0;
+            color: #A98467;
             border-radius: 50%;
             width: 32px;
             height: 32px;
@@ -94,35 +86,16 @@
             margin-right: 12px;
             font-weight: 700;
             flex-shrink: 0;
-            font-size: 1rem;
-        }
-
-        /* Small Floating Score */
-        .floating-score {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border: 2px solid #D4A373;
-            padding: 10px 20px;
-            border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            border: 1px solid #E6D5C5;
         }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
     <div id="survey-content" class="max-w-3xl mx-auto">
-        <!-- 標題 -->
         <header class="text-center mb-12">
             <h1 class="text-3xl md:text-4xl font-bold mb-4" style="color: #6D4C41;">疼痛與生活功能評估表</h1>
-            <div class="h-1 w-20 bg-amber-200 mx-auto mb-4"></div>
-            <p class="text-lg text-stone-500">親愛的長輩您好，請根據近 1-2 週的情況回答</p>
+            <p class="text-lg text-stone-500">請根據您近 1-2 週的情況回答，未回答題目將標記為 NIL</p>
         </header>
 
         <!-- 基本資料 -->
@@ -131,7 +104,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-xl font-medium mb-2">姓名</label>
-                    <input type="text" id="userName" name="userName" placeholder="填寫您的姓名" class="input-field">
+                    <input type="text" id="userName" name="userName" placeholder="填寫姓名" class="input-field">
                 </div>
                 <div>
                     <label class="block text-xl font-medium mb-2">填寫日期</label>
@@ -140,28 +113,26 @@
             </div>
         </section>
 
-        <!-- 疼痛指數 (Memphis 風格圖示) -->
+        <!-- 疼痛指數評估 -->
         <section class="card p-8 mb-8">
-            <h2 class="section-title text-2xl mb-6">疼痛程度評估</h2>
-            
+            <h2 class="section-title text-2xl mb-6">疼痛指數評估</h2>
             <div class="mb-10">
                 <p class="text-xl font-bold mb-4 text-stone-700">1. 下背疼痛指數 (0-10)</p>
                 <div class="flex gap-1" id="vas-back-container"></div>
-                <div class="flex justify-between mt-3 text-sm font-bold text-stone-400 px-2 uppercase">
+                <div class="flex justify-between mt-3 text-xs font-bold text-stone-400 px-1 uppercase">
                     <span>完全不痛</span>
                     <span>極度疼痛</span>
                 </div>
-                <input type="hidden" id="vas-back-value" name="vas_back">
+                <input type="hidden" id="vas-back-value">
             </div>
-
             <div>
                 <p class="text-xl font-bold mb-4 text-stone-700">2. 下肢疼痛指數 (0-10)</p>
                 <div class="flex gap-1" id="vas-leg-container"></div>
-                <div class="flex justify-between mt-3 text-sm font-bold text-stone-400 px-2 uppercase">
+                <div class="flex justify-between mt-3 text-xs font-bold text-stone-400 px-1 uppercase">
                     <span>完全不痛</span>
                     <span>極度疼痛</span>
                 </div>
-                <input type="hidden" id="vas-leg-value" name="vas_leg">
+                <input type="hidden" id="vas-leg-value">
             </div>
         </section>
 
@@ -169,64 +140,61 @@
         <form id="odi-form">
             <div id="questions-container"></div>
 
-            <!-- 底部提交與PDF按鈕 -->
-            <div class="flex flex-col gap-4 mt-12 mb-24">
+            <!-- 總分呈現區 (非浮動) -->
+            <section class="card p-8 mb-8 border-2 border-amber-200 bg-amber-50/30">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-amber-900">評估結果總結</h2>
+                        <p class="text-stone-500">根據您的作答情形，計算出的功能障礙指數為：</p>
+                    </div>
+                    <div class="text-center">
+                        <span id="score-text" class="text-6xl font-black text-amber-600">0%</span>
+                        <p id="score-detail" class="text-sm font-bold text-amber-800/60 mt-2">尚未開始填寫</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 按鈕 -->
+            <div class="flex flex-col gap-4 mt-8 mb-24">
                 <button type="button" onclick="submitForm()" class="bg-[#D4A373] hover:bg-[#B88B5D] text-white text-2xl font-bold py-5 rounded-2xl shadow-lg transition duration-200">
-                    提交問卷並保存
+                    確認並提交問卷
                 </button>
                 <button type="button" onclick="generatePDF()" class="bg-[#A98467] hover:bg-[#8E6D52] text-white text-xl font-bold py-5 rounded-2xl shadow-lg transition duration-200">
-                    下載完整 PDF 報告
+                    下載完整報告 (PDF)
                 </button>
             </div>
         </form>
     </div>
 
-    <!-- 小尺寸浮動分數欄 -->
-    <div class="floating-score" id="float-score-box">
-        <span class="text-stone-600 font-bold">ODI 總分：</span>
-        <span id="score-text" class="text-2xl font-black text-amber-600">0%</span>
-    </div>
-
-    <!-- 訊息提示視窗 -->
+    <!-- Modal -->
     <div id="modal" class="fixed inset-0 bg-black/40 hidden z-[200] flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
-            <h3 id="modal-title" class="text-2xl font-bold mb-4 text-stone-800">提示</h3>
-            <p id="modal-text" class="text-lg text-stone-600 mb-8">內容</p>
-            <button onclick="closeModal()" class="w-full py-3 bg-stone-100 rounded-xl text-lg font-bold hover:bg-stone-200">關閉</button>
+            <h3 id="modal-title" class="text-2xl font-bold mb-4">提示</h3>
+            <p id="modal-text" class="text-lg text-stone-600 mb-8"></p>
+            <button onclick="closeModal()" class="w-full py-3 bg-stone-100 rounded-xl text-lg font-bold">了解</button>
         </div>
     </div>
 
     <script>
         const scriptURL = "https://script.google.com/macros/s/AKfycbxFa2UzRANfomFtYEcOA4Uj_7t_lq_7J1m_V7_qs0U_ndsxaB5G401OeBTnsFQdkdF7/exec";
 
-        // Memphis 風格表情 (0-10 色階與表情)
         function getMemphisSVG(score) {
             const colors = ['#00F5D4', '#00BBF9', '#9B5DE5', '#F15BB5', '#FEE440', '#FB5607', '#FF006E', '#8338EC', '#3A86FF', '#D90429', '#000000'];
-            const color = colors[score];
-            let mouth = "";
-            if (score <= 2) mouth = `<circle cx="15" cy="20" r="4" fill="none" stroke="black" stroke-width="2.5" stroke-dasharray="1 1"/>`;
-            else if (score <= 5) mouth = `<line x1="10" y1="20" x2="20" y2="20" stroke="black" stroke-width="3" stroke-linecap="round"/>`;
-            else mouth = `<path d="M10 23 Q15 15 20 23" fill="none" stroke="black" stroke-width="3" stroke-linecap="round"/>`;
-
-            return `<svg viewBox="0 0 30 30" class="face-icon">
-                <rect x="2" y="2" width="26" height="26" fill="${color}" stroke="black" stroke-width="2"/>
-                <circle cx="9" cy="11" r="2.5" fill="black"/>
-                <circle cx="21" cy="11" r="2.5" fill="black"/>
-                ${mouth}
-            </svg>`;
+            let mouth = score <= 2 ? `<circle cx="15" cy="20" r="4" fill="none" stroke="black" stroke-width="2.5" stroke-dasharray="1 1"/>` :
+                        score <= 5 ? `<line x1="10" y1="20" x2="20" y2="20" stroke="black" stroke-width="3" stroke-linecap="round"/>` :
+                        `<path d="M10 23 Q15 15 20 23" fill="none" stroke="black" stroke-width="3" stroke-linecap="round"/>`;
+            return `<svg viewBox="0 0 30 30" class="face-icon"><rect x="2" y="2" width="26" height="26" fill="${colors[score]}" stroke="black" stroke-width="2"/><circle cx="9" cy="11" r="2.5" fill="black"/><circle cx="21" cy="11" r="2.5" fill="black"/>${mouth}</svg>`;
         }
 
         window.onload = () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('fillDate').value = today;
-
             ['back', 'leg'].forEach(type => {
                 const container = document.getElementById(`vas-${type}-container`);
                 for(let i=0; i<=10; i++) {
                     const btn = document.createElement('div');
-                    btn.className = 'vas-btn';
-                    btn.id = `vas-${type}-${i}`;
-                    btn.innerHTML = `${getMemphisSVG(i)}<span class="text-xs">${i}</span>`;
+                    btn.className = 'vas-btn'; btn.id = `vas-${type}-${i}`;
+                    btn.innerHTML = `${getMemphisSVG(i)}<span class="text-[10px]">${i}</span>`;
                     btn.onclick = () => selectVas(type, i);
                     container.appendChild(btn);
                 }
@@ -242,7 +210,7 @@
         const questions = [
             { id: "q1", title: "第一部份：疼痛程度", options: ["我現在不痛。", "輕微的疼痛。", "中等程度的疼痛。", "相當嚴重的疼痛。", "非常嚴重的疼痛。", "無法形容的疼痛。"] },
             { id: "q2", title: "第二部份：自我照顧", options: ["可自我照顧，不會更痛。", "可自我照顧，但會痛。", "可自我照顧，但覺得很痛。", "大部分可自理，但需協助。", "每天大部分都需要協助。", "完全無法自理，需臥床。"] },
-            { id: "q3", title: "第三部份：抬舉物品", options: ["可舉重物，不會更痛。", "可舉重物，但會更痛。", "無法從地舉，桌上可以。", "無法舉重，輕的可以。", "只能舉起很輕的東西。", "完全無法舉起任何。"] },
+            { id: "q3", title: "第三部份：抬舉物品", options: ["可舉重物，不會更痛。", "可舉重物，但會痛。", "無法從地舉，桌上可以。", "無法舉重，輕的可以。", "只能舉起很輕的東西。", "完全無法舉起任何。"] },
             { id: "q4", title: "第四部份：走路", options: ["可以走任何距離。", "無法走超過 1.6 公里。", "無法走超過 400 公尺。", "無法走超過 100 公尺。", "需依靠柺杖才能走。", "大部分時間都臥床。"] },
             { id: "q5", title: "第五部份：坐", options: ["可以坐任何椅子。", "只能坐特定椅子。", "無法坐超過 1 小時。", "無法坐超過半小時。", "無法坐超過 10 分鐘。", "我無法坐著。"] },
             { id: "q6", title: "第六部份：站", options: ["要站多久都可以。", "可站很久，但會痛。", "無法站超過 1 小時。", "無法站超過半小時。", "無法站超過 10 分鐘。", "我無法站著。"] },
@@ -253,18 +221,12 @@
         ];
 
         const qContainer = document.getElementById('questions-container');
-        questions.forEach((q) => {
+        questions.forEach(q => {
             let html = `<section class="card p-8 mb-8"><h2 class="section-title text-2xl mb-6">${q.title}</h2><div class="space-y-3">`;
             q.options.forEach((opt, idx) => {
-                html += `
-                    <label class="radio-item text-xl">
-                        <input type="radio" name="${q.id}" value="${idx}" onchange="calculateScore()">
-                        <span class="score-badge">${idx}</span>
-                        <span>${opt}</span>
-                    </label>`;
+                html += `<label class="radio-item text-xl"><input type="radio" name="${q.id}" value="${idx}" onchange="calculateScore()"><span class="score-badge">${idx}</span><span>${opt}</span></label>`;
             });
-            html += `</div></section>`;
-            qContainer.innerHTML += html;
+            qContainer.innerHTML += html + `</div></section>`;
         });
 
         function calculateScore() {
@@ -276,6 +238,7 @@
             });
             const pct = count > 0 ? Math.round((total / (count * 5)) * 100) : 0;
             document.getElementById('score-text').innerText = `${pct}%`;
+            document.getElementById('score-detail').innerText = `目前得分：${total}分 / 已回答：${count}題`;
             return pct;
         }
 
@@ -287,30 +250,27 @@
         function closeModal() { document.getElementById('modal').classList.add('hidden'); }
 
         async function submitForm() {
-            const name = document.getElementById('userName').value || "未命名";
-            const date = document.getElementById('fillDate').value;
-            const vasBack = document.getElementById('vas-back-value').value || 0;
-            const vasLeg = document.getElementById('vas-leg-value').value || 0;
+            const name = document.getElementById('userName').value || "NIL";
+            const date = document.getElementById('fillDate').value || "NIL";
+            const vasBack = document.getElementById('vas-back-value').value || "NIL";
+            const vasLeg = document.getElementById('vas-leg-value').value || "NIL";
             const scorePct = document.getElementById('score-text').innerText;
 
             const formData = new FormData(document.getElementById('odi-form'));
-            const data = { 
-                userName: name, 
-                fillDate: date,
-                vasBack, vasLeg,
-                odiScore: scorePct
-            };
+            const data = { userName: name, fillDate: date, vasBack, vasLeg, odiScore: scorePct };
 
+            // 確保每一題都有值，未選則填 NIL
             questions.forEach(q => {
-                data[q.id] = formData.get(q.id) || "未回答";
+                const val = formData.get(q.id);
+                data[q.id] = (val !== null) ? val : "NIL";
             });
 
             try {
-                showModal("處理中", "資料儲存中，請稍候...");
+                showModal("處理中", "正在為您存檔，請稍候...");
                 await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-                showModal("完成", "問卷資料已保存！");
+                showModal("成功", "問卷資料已成功儲存！");
             } catch (error) {
-                showModal("錯誤", "提交失敗，請檢查網路。");
+                showModal("錯誤", "提交失敗，請檢查網路連線。");
             }
         }
 
@@ -318,13 +278,10 @@
             const { jsPDF } = window.jspdf;
             const element = document.getElementById('survey-content');
             const buttons = document.querySelectorAll('button');
-            const floatBox = document.getElementById('float-score-box');
-            
             buttons.forEach(b => b.style.opacity = '0');
-            floatBox.style.display = 'none';
 
             try {
-                const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#FFF9F5' });
+                const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#FFFDFB' });
                 const imgData = canvas.toDataURL('image/png');
                 const pdf = new jsPDF('p', 'mm', 'a4');
                 const pdfWidth = 210;
@@ -343,10 +300,9 @@
                     pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
                     heightLeft -= pageHeight;
                 }
-                pdf.save(`疼痛報告_${document.getElementById('userName').value || '未命名'}.pdf`);
+                pdf.save(`疼痛評估報告_${document.getElementById('userName').value || '未填名'}.pdf`);
             } finally {
                 buttons.forEach(b => b.style.opacity = '1');
-                floatBox.style.display = 'flex';
             }
         }
     </script>
