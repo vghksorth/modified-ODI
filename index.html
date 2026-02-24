@@ -11,11 +11,31 @@
     <style>
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background-color: #FFFDFB;
+            background-color: #FFFDFB; /* 更清爽的暖白色 */
             color: #5D4037;
+            position: relative;
+            min-height: 100vh;
+        }
+        /* 浮水印設定 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw;
+            height: 80vh;
+            background-image: url('image_7b9c3d.jpg'); /* 醫療部Logo */
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            opacity: 0.05; /* 極低透明度，確保不影響閱讀 */
+            pointer-events: none; /* 確保不干擾點擊 */
+            z-index: -1;
+            filter: grayscale(100%); /* 轉為單色系 */
         }
         .card {
-            background: white;
+            background: rgba(255, 255, 255, 0.95); /* 微透明背景讓浮水印若隱若現 */
             border-radius: 20px;
             box-shadow: 0 8px 30px rgba(210, 180, 160, 0.1);
             border: 1px solid #F5E6D3;
@@ -27,6 +47,7 @@
             width: 100%;
             font-size: 1.25rem;
             outline: none;
+            transition: border-color 0.2s;
         }
         .radio-item {
             display: flex;
@@ -64,6 +85,7 @@
             flex-direction: column;
             align-items: center;
             background: white;
+            transition: all 0.1s;
         }
         .vas-selected {
             background-color: #F15BB5 !important;
@@ -87,7 +109,7 @@
             border: 1px solid #E6D5C5;
         }
 
-        /* PDF Summary Table Styles (Hidden on Screen) */
+        /* PDF Summary Table Styles */
         #pdf-summary {
             position: absolute;
             left: -9999px;
@@ -162,18 +184,25 @@
 
             <!-- 總分呈現區 -->
             <section class="card p-8 mb-8 border-2 border-amber-200 bg-amber-50/30">
-                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6">
                     <div>
-                        <h2 class="text-2xl font-bold text-amber-900">Oswestry Disability Index總分</h2>
-                        <p class="text-stone-500">根據您的作答情形，結果為：</p>
+                        <h2 class="text-2xl font-bold text-amber-900 mb-1">Oswestry Disability Index總分</h2>
+                        <p class="text-stone-600 mb-4">根據您的作答情形，結果為：</p>
+                        
+                        <div class="text-stone-500 italic text-sm leading-relaxed border-t border-amber-200 pt-4">
+                            誠摯感謝您耐心配合填寫，<br>
+                            您的寶貴資訊將有助於更精準的臨床評估與照護規劃，祝您早日康復。<br>
+                            <span class="font-bold text-stone-700 mt-2 block">高雄榮總骨科部 敬啟</span>
+                        </div>
                     </div>
-                    <div class="text-center">
+                    <div class="text-center min-w-[120px]">
                         <span id="score-text" class="text-6xl font-black text-amber-600">0%</span>
                         <p id="score-detail" class="text-sm font-bold text-amber-800/60 mt-2">尚未開始填寫</p>
                     </div>
                 </div>
             </section>
 
+            <!-- 按鈕 -->
             <div class="flex flex-col gap-4 mt-8 mb-24">
                 <button type="button" onclick="submitForm()" class="bg-[#D4A373] hover:bg-[#B88B5D] text-white text-2xl font-bold py-5 rounded-2xl shadow-lg transition duration-200">
                     確認並提交問卷
@@ -185,7 +214,7 @@
         </form>
     </div>
 
-    <!-- PDF 隱藏總結區塊 (依照 image_6d6a3f.png 設計) -->
+    <!-- PDF 隱藏總結區塊 -->
     <div id="pdf-summary">
         <div style="border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between;">
             <div style="font-size: 24px; font-weight: bold;">姓名：<span id="pdf-name"></span></div>
@@ -219,11 +248,15 @@
         <div style="margin-top: 40px; font-size: 26px; font-weight: 900; border-top: 3px double black; padding-top: 20px;">
             Modified ODI 總分：<span id="pdf-total-score"></span>
         </div>
+        <div style="margin-top: 30px; font-size: 16px; color: #666; font-style: italic;">
+            誠摯感謝您耐心配合填寫，您的寶貴資訊將有助於更精準的臨床評估與照護規劃。<br>
+            高雄榮總骨科部 敬啟
+        </div>
     </div>
 
     <div id="modal" class="fixed inset-0 bg-black/40 hidden z-[200] flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
-            <h3 id="modal-title" class="text-2xl font-bold mb-4">提示</h3>
+            <h3 id="modal-title" class="text-2xl font-bold mb-4 text-stone-800">提示</h3>
             <p id="modal-text" class="text-lg text-stone-600 mb-8"></p>
             <button onclick="closeModal()" class="w-full py-3 bg-stone-100 rounded-xl text-lg font-bold">了解</button>
         </div>
@@ -277,7 +310,7 @@
         const optionsArr = [
             ["我現在不痛。", "輕微的疼痛。", "中等程度的疼痛。", "相當嚴重的疼痛。", "非常嚴重的疼痛。", "無法形容的疼痛。"],
             ["可自我照顧，不會更痛。", "可自我照顧，但會痛。", "可自我照顧，但覺得很痛。", "大部分可自理，但需協助。", "每天大部分都需要協助。", "完全無法自理，需臥床。"],
-            ["可舉重物，不會更痛。", "可舉重物，但會痛。", "無法從地舉，桌上可以。", "無法舉重，輕的可以。", "只能舉起很輕的東西。", "完全無法舉起任何。"],
+            ["可舉重物，不會更痛。", "可舉重物，但會痛。", "無法從地舉，桌上可以。", "無法舉重物，但輕的物品可以。", "只能舉起很輕的東西。", "完全無法舉起任何。"],
             ["可以走任何距離。", "無法走超過 1.6 公里。", "無法走超過 400 公尺。", "無法走超過 100 公尺。", "需依靠柺杖才能走。", "大部分時間都臥床。"],
             ["可以坐任何椅子。", "只能坐特定椅子。", "無法坐超過 1 小時。", "無法坐超過半小時。", "無法坐超過 10 分鐘。", "我無法坐著。"],
             ["要站多久都可以。", "可站很久，但會痛。", "無法站超過 1 小時。", "無法站超過半小時。", "無法站超過 10 分鐘。", "我無法站著。"],
@@ -341,7 +374,6 @@
         }
 
         async function generatePDF() {
-            // 填寫 PDF 表格內容
             const name = document.getElementById('userName').value || "未填寫";
             const date = document.getElementById('fillDate').value || "未填寫";
             document.getElementById('pdf-name').innerText = name;
@@ -362,7 +394,6 @@
             const element = document.getElementById('pdf-summary');
 
             try {
-                // 暫時將總結區移入視野進行截圖
                 element.style.position = 'static';
                 element.style.left = '0';
                 element.style.top = '0';
@@ -378,7 +409,6 @@
             } catch (e) {
                 showModal("錯誤", "PDF 產生失敗");
             } finally {
-                // 還原隱藏狀態
                 element.style.position = 'absolute';
                 element.style.left = '-9999px';
                 element.style.top = '-9999px';
