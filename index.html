@@ -29,7 +29,7 @@
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
-            opacity: 0.20; /* 極低透明度，確保不影響閱讀 */
+            opacity: 0.60; /* 極低透明度，確保不影響閱讀 */
             pointer-events: none; /* 確保不干擾點擊 */
             z-index: -1;
             filter: grayscale(100%); /* 轉為單色系 */
@@ -137,7 +137,7 @@
     <div id="survey-content" class="max-w-3xl mx-auto">
         <header class="text-center mb-12">
             <h1 class="text-3xl md:text-4xl font-bold mb-4" style="color: #6D4C41;">疼痛與生活功能評估表</h1>
-            <p class="text-lg text-stone-500">請根據您近 1-2 週的情況回答，未回答題目將標記為 NIL</p>
+            <p class="text-lg text-stone-500">請根據您近 1-2 週的情況回答</p>
         </header>
 
         <!-- 基本資料 -->
@@ -159,7 +159,7 @@
         <section class="card p-8 mb-8">
             <h2 class="section-title text-2xl mb-6">疼痛指數評估</h2>
             <div class="mb-10">
-                <p class="text-xl font-bold mb-4 text-stone-700">1. 下背疼痛指數 (0-10)</p>
+                <p class="text-xl font-bold mb-4 text-stone-700">1. 背部疼痛指數 (0-10)</p>
                 <div class="flex gap-1" id="vas-back-container"></div>
                 <div class="flex justify-between mt-3 text-xs font-bold text-stone-400 px-1 uppercase">
                     <span>完全不痛</span>
@@ -417,4 +417,5 @@
     </script>
 </body>
 </html>
+
 
