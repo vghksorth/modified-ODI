@@ -11,31 +11,27 @@
     <style>
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background-color: #FFFDFB; /* 更清爽的暖白色 */
+            background-color: #FFFDFB;
             color: #5D4037;
-            position: relative;
-            min-height: 100vh;
         }
-        /* 浮水印設定 */
-        body::before {
-            content: "";
+        /* 固定角落 Logo */
+        .fixed-logo {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80vw;
-            height: 80vh;
-            background-image: url('image_7b9c3d.jpg'); /* 醫療部Logo */
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain;
-            opacity: 0.60; /* 極低透明度，確保不影響閱讀 */
-            pointer-events: none; /* 確保不干擾點擊 */
-            z-index: -1;
-            filter: grayscale(100%); /* 轉為單色系 */
+            top: 20px;
+            right: 20px;
+            width: 80px;
+            height: auto;
+            z-index: 1000;
+            opacity: 0.9;
+            pointer-events: none;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
         }
+        @media (max-width: 768px) {
+            .fixed-logo { width: 60px; top: 10px; right: 10px; }
+        }
+
         .card {
-            background: rgba(255, 255, 255, 0.95); /* 微透明背景讓浮水印若隱若現 */
+            background: white;
             border-radius: 20px;
             box-shadow: 0 8px 30px rgba(210, 180, 160, 0.1);
             border: 1px solid #F5E6D3;
@@ -73,7 +69,6 @@
             padding-left: 15px;
             font-weight: 700;
         }
-        /* VAS Memphis Icons */
         .vas-btn {
             flex: 1;
             padding: 10px 2px;
@@ -85,7 +80,6 @@
             flex-direction: column;
             align-items: center;
             background: white;
-            transition: all 0.1s;
         }
         .vas-selected {
             background-color: #F15BB5 !important;
@@ -134,23 +128,32 @@
 </head>
 <body class="p-4 md:p-10">
 
+    <!-- 角落固定 Logo -->
+    <img src="image_7b9c3d.jpg" class="fixed-logo" alt="高雄榮總骨科部 Logo">
+
     <div id="survey-content" class="max-w-3xl mx-auto">
         <header class="text-center mb-12">
             <h1 class="text-3xl md:text-4xl font-bold mb-4" style="color: #6D4C41;">疼痛與生活功能評估表</h1>
-            <p class="text-lg text-stone-500">請根據您近 1-2 週的情況回答</p>
+            <p class="text-lg text-stone-500">請根據您近 1-2 週的情況回答，未回答題目將標記為 NIL</p>
         </header>
 
         <!-- 基本資料 -->
         <section class="card p-8 mb-8">
             <h2 class="section-title text-2xl mb-6">基本資料</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-xl font-medium mb-2">姓名</label>
-                    <input type="text" id="userName" name="userName" placeholder="填寫姓名" class="input-field">
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xl font-medium mb-2">姓名</label>
+                        <input type="text" id="userName" name="userName" placeholder="填寫姓名" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-xl font-medium mb-2">填寫日期</label>
+                        <input type="date" id="fillDate" name="fillDate" class="input-field">
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-xl font-medium mb-2">填寫日期</label>
-                    <input type="date" id="fillDate" name="fillDate" class="input-field">
+                    <label class="block text-xl font-medium mb-2">病歷號 <span class="text-sm font-normal text-stone-400">(由醫療端填寫)</span></label>
+                    <input type="text" id="medicalId" name="medicalId" placeholder="請輸入病歷號" class="input-field">
                 </div>
             </div>
         </section>
@@ -159,7 +162,7 @@
         <section class="card p-8 mb-8">
             <h2 class="section-title text-2xl mb-6">疼痛指數評估</h2>
             <div class="mb-10">
-                <p class="text-xl font-bold mb-4 text-stone-700">1. 背部疼痛指數 (0-10)</p>
+                <p class="text-xl font-bold mb-4 text-stone-700">1. 下背疼痛指數 (0-10)</p>
                 <div class="flex gap-1" id="vas-back-container"></div>
                 <div class="flex justify-between mt-3 text-xs font-bold text-stone-400 px-1 uppercase">
                     <span>完全不痛</span>
@@ -185,8 +188,8 @@
             <!-- 總分呈現區 -->
             <section class="card p-8 mb-8 border-2 border-amber-200 bg-amber-50/30">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-amber-900 mb-1">Oswestry Disability Index總分</h2>
+                    <div class="flex-1">
+                        <h2 class="text-2xl font-bold text-amber-900 mb-1">Oswestry Disability Index 總分</h2>
                         <p class="text-stone-600 mb-4">根據您的作答情形，結果為：</p>
                         
                         <div class="text-stone-500 italic text-sm leading-relaxed border-t border-amber-200 pt-4">
@@ -216,23 +219,27 @@
 
     <!-- PDF 隱藏總結區塊 -->
     <div id="pdf-summary">
-        <div style="border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between;">
-            <div style="font-size: 24px; font-weight: bold;">姓名：<span id="pdf-name"></span></div>
-            <div style="font-size: 24px; font-weight: bold;">填寫日期：<span id="pdf-date"></span></div>
+        <div style="border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <div style="font-size: 22px; font-weight: bold;">病歷號：<span id="pdf-medical-id"></span></div>
+                <div style="font-size: 22px; font-weight: bold;">填寫日期：<span id="pdf-date"></span></div>
+            </div>
+            <div style="font-size: 22px; font-weight: bold;">患者姓名：<span id="pdf-name"></span></div>
         </div>
         
-        <h3 style="font-size: 22px; font-weight: bold; margin-bottom: 10px;">第一部分：VAS 分數</h3>
-        <table class="summary-table" style="margin-bottom: 30px;">
+        <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">第一部分：VAS 疼痛評估</h3>
+        <table class="summary-table" style="margin-bottom: 25px;">
             <tr>
-                <th style="width: 70%;">背部 VAS</th>
+                <th style="width: 70%;">下背疼痛指數 (Back VAS)</th>
                 <td id="pdf-vas-back"></td>
             </tr>
             <tr>
-                <th>下肢 VAS</th>
+                <th>下肢疼痛指數 (Leg VAS)</th>
                 <td id="pdf-vas-leg"></td>
             </tr>
         </table>
 
+        <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">第二部分：ODI 功能評估項目</h3>
         <table class="summary-table">
             <thead>
                 <tr style="background-color: #f2f2f2;">
@@ -240,15 +247,13 @@
                     <th>得分 (0-5)</th>
                 </tr>
             </thead>
-            <tbody id="pdf-table-body">
-                <!-- 由 JS 動態填入 -->
-            </tbody>
+            <tbody id="pdf-table-body"></tbody>
         </table>
 
-        <div style="margin-top: 40px; font-size: 26px; font-weight: 900; border-top: 3px double black; padding-top: 20px;">
-            Modified ODI 總分：<span id="pdf-total-score"></span>
+        <div style="margin-top: 35px; font-size: 24px; font-weight: 900; border-top: 3px double black; padding-top: 20px;">
+            Oswestry Disability Index 總分：<span id="pdf-total-score"></span>
         </div>
-        <div style="margin-top: 30px; font-size: 16px; color: #666; font-style: italic;">
+        <div style="margin-top: 30px; font-size: 15px; color: #555; font-style: italic; line-height: 1.6;">
             誠摯感謝您耐心配合填寫，您的寶貴資訊將有助於更精準的臨床評估與照護規劃。<br>
             高雄榮總骨科部 敬啟
         </div>
@@ -352,12 +357,19 @@
         async function submitForm() {
             const name = document.getElementById('userName').value || "NIL";
             const date = document.getElementById('fillDate').value || "NIL";
+            const mId = document.getElementById('medicalId').value || "NIL";
             const vasBack = document.getElementById('vas-back-value').value || "NIL";
             const vasLeg = document.getElementById('vas-leg-value').value || "NIL";
             const scorePct = document.getElementById('score-text').innerText;
 
             const formData = new FormData(document.getElementById('odi-form'));
-            const data = { userName: name, fillDate: date, vasBack, vasLeg, odiScore: scorePct };
+            const data = { 
+                medicalId: mId,
+                userName: name, 
+                fillDate: date, 
+                vasBack, vasLeg, 
+                odiScore: scorePct 
+            };
 
             questions.forEach(q => {
                 const val = formData.get(q.id);
@@ -374,8 +386,11 @@
         }
 
         async function generatePDF() {
+            const mId = document.getElementById('medicalId').value || "未填寫";
             const name = document.getElementById('userName').value || "未填寫";
             const date = document.getElementById('fillDate').value || "未填寫";
+            
+            document.getElementById('pdf-medical-id').innerText = mId;
             document.getElementById('pdf-name').innerText = name;
             document.getElementById('pdf-date').innerText = date;
             document.getElementById('pdf-vas-back').innerText = document.getElementById('vas-back-value').value || "NIL";
@@ -405,7 +420,7 @@
                 const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
                 
                 pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-                pdf.save(`疼痛評估總結_${name}.pdf`);
+                pdf.save(`疼痛評估總結_${mId}_${name}.pdf`);
             } catch (e) {
                 showModal("錯誤", "PDF 產生失敗");
             } finally {
@@ -417,5 +432,3 @@
     </script>
 </body>
 </html>
-
-
